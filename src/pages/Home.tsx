@@ -2,15 +2,15 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 
-// Login
-const Login: React.FC = () => {
+// Home
+const Home: React.FC = () => {
     return (
         <>
             <Navbar />
-            Login
+            Home
         </>
     );
 }
 
 // Export
-export default Login;
+export default Home;

@@ -2,15 +2,15 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 
-// Login
-const Login: React.FC = () => {
+// Register
+const Register: React.FC = () => {
     return (
         <>
             <Navbar />
-            Login
+            Register
         </>
     );
 }
 
 // Export
-export default Login;
+export default Register;
