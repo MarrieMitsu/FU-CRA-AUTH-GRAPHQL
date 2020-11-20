@@ -62,7 +62,6 @@ const DashboardProfile: React.FC = () => {
             container
             direction="column"
             alignItems="center"
-            justify="space-evenly"
         >
             <Grid item>
                 <Box className={classes.profilePic}>
@@ -104,7 +103,7 @@ const DashboardProfile: React.FC = () => {
                 </Box>
             </Grid>
             <Grid item className={classes.fullWidth}>
-                <Box>
+                <Box mt={4}>
                     <Grid 
                         container
                         direction="row"
