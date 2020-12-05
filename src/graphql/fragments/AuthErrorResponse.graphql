@@ -1,0 +1,4 @@
+fragment AuthErrorResponse on FieldError {
+    field
+    message
+}

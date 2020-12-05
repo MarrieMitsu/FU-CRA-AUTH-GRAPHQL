@@ -3,9 +3,12 @@ import { Box, Button, Container, Grid, Hidden, Link, Paper, TextField, Typograph
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Formik, FormikHelpers } from "formik";
 import React from "react";
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, RouteComponentProps } from "react-router-dom";
 import * as Yup from "yup";
 import Navbar from "../components/Navbar";
+import { MeDocument, MeQuery, useLoginMutation } from "../generated/graphql";
+import { accessToken } from "../utils/accessToken";
+import { mapFieldError } from "../utils/mapFieldError";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) => 
@@ -35,8 +38,9 @@ interface Values {
 }
 
 // Login
-const Login: React.FC = () => {
+const Login: React.FC<RouteComponentProps> = ({ history }) => {
     const classes = useStyles();
+    const [loginMutation] = useLoginMutation();
 
     return (
         <>
@@ -62,11 +66,33 @@ const Login: React.FC = () => {
                                     usernameOrEmail: Yup.string().required("required"),
                                     password: Yup.string().required("required")
                                 })}
-                                onSubmit={(
-                                    val: Values, 
-                                    { setSubmitting }: FormikHelpers<Values>
-                                ) => {
-                                    console.log("Submit data: ", val);
+                                onSubmit={ async (val: Values, { setErrors }: FormikHelpers<Values>) => {
+                                    const response = await loginMutation({
+                                        variables: {
+                                            input: {
+                                                unique: val.usernameOrEmail,
+                                                password: val.password,
+                                            },
+                                        },
+                                        update: (cache, {data}) => {
+                                            if (!data) {
+                                                return null;
+                                            }
+                                            cache.writeQuery<MeQuery>({
+                                                query: MeDocument,
+                                                data: {
+                                                    me: data.login.user
+                                                }
+                                            })
+                                        }
+                                    });
+
+                                    if (response.data?.login.errors) {
+                                        setErrors(mapFieldError(response.data.login.errors));
+                                    } else {
+                                        accessToken.setAccessToken(response.data?.login.accessToken);
+                                        history.push('/dashboard');
+                                    }
                                 }}
                             >
                                 {formik => (
@@ -118,6 +144,7 @@ const Login: React.FC = () => {
                                             color="secondary"
                                             variant="contained"
                                             disableElevation
+                                            disabled={formik.isSubmitting}
                                             type="submit"
                                             fullWidth
                                         >

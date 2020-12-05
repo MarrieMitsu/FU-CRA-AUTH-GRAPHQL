@@ -58,7 +58,7 @@ const ProfileChangePassword: React.FC = () => {
                         newPassword: Yup.string(),
                         confirmNewPassword: Yup.string().test("password-match", "Password must match", function (val) {
                             return this.parent.newPassword === val;
-                        }).required("requried"),
+                        }),
                     })}
                     onSubmit={(
                         val: Values,

@@ -1,6 +1,8 @@
 // Packages
 import React from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Switch } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useMeQuery } from "./generated/graphql";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -10,15 +12,53 @@ import Register from "./pages/Register";
 
 // Router
 const Router: React.FC = () => {
+    const { data } = useMeQuery();
+
     return (
         <BrowserRouter>
             <Switch>
-                <Route exact path="/" component={Home} />
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/register" component={Register} />
-                <Route exact path="/forgot-password" component={ForgotPassword} />
-                <Route exact path="/dashboard" component={Dashboard} />
-                <Route exact path="/change-password/:token" component={ChangePassword} />
+                <ProtectedRoute 
+                    needAuth={false}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact 
+                    path="/" 
+                    component={Home} 
+                />
+                <ProtectedRoute
+                    needAuth={false}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact
+                    path="/login"
+                    component={Login}
+                />
+                <ProtectedRoute
+                    needAuth={false}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact
+                    path="/register"
+                    component={Register}
+                />
+                <ProtectedRoute
+                    needAuth={false}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact
+                    path="/forgot-password"
+                    component={ForgotPassword}
+                />
+                <ProtectedRoute
+                    needAuth={true}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact
+                    path="/dashboard"
+                    component={Dashboard}
+                />
+                <ProtectedRoute
+                    needAuth={false}
+                    isAuthenticated={Boolean(data?.me)}
+                    exact
+                    path="/change-password/:token"
+                    component={ChangePassword}
+                />
             </Switch>
         </BrowserRouter>
     );

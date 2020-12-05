@@ -4,7 +4,9 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { AccountCircle as AccountCircleIcon, Close as CloseIcon, Link as LinkIcon, Menu as MenuIcon } from "@material-ui/icons";
 import React, { useState } from "react";
 import { Link as LinkRouter } from "react-router-dom";
-import { SlideTransition } from "../utils/customTransition";
+import { useLogoutMutation } from "../generated/graphql";
+import { accessToken } from "../utils/accessToken";
+import { SlideTransition } from "./customTransition";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) => 
@@ -34,6 +36,7 @@ interface NavbarProps {
 
 // Navbar
 const Navbar: React.FC<NavbarProps> = ({login}) => {
+    const [logoutMutation, { client }] = useLogoutMutation();
     const classes = useStyles();
     const [open, setOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -70,9 +73,13 @@ const Navbar: React.FC<NavbarProps> = ({login}) => {
                                 open={Boolean(anchorEl)}
                                 onClose={handleCloseProfileDialog}
                             >
-                                <MenuItem
-                                    component={LinkRouter}
-                                    to="/"
+                                <MenuItem 
+                                    onClick={async () => {
+                                        await logoutMutation();
+                                        accessToken.setAccessToken("");
+                                        await client.resetStore();
+
+                                    }}
                                 >
                                     Logout
                                 </MenuItem>

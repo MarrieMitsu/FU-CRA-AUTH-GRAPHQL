@@ -3,7 +3,7 @@ import { Avatar, Box, ButtonBase, Card, CardMedia, Dialog, Divider, Grid, Hidden
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { PhotoCamera as PhotoCameraIcon } from "@material-ui/icons";
 import React, { useState } from "react";
-import { ZoomTransition } from "../utils/customTransition";
+import { ZoomTransition } from "./customTransition";
 import ProfileChangePassword from "./ProfileChangePassword";
 import ProfileDangerZone from "./ProfileDangerZone";
 import ProfileGeneral from "./ProfileGeneral";

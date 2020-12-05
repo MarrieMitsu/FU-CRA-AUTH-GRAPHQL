@@ -1,0 +1,9 @@
+fragment AuthResponse on UserResponse {
+    errors {
+        ...AuthErrorResponse
+    }
+    user {
+        ...UserData
+    }
+    accessToken
+}

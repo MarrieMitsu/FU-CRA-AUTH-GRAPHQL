@@ -1,0 +1,9 @@
+fragment UserData on User {
+    id
+    name
+    username
+    email
+    profileImage
+    createdAt
+    updatedAt
+}

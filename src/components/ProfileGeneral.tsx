@@ -1,9 +1,10 @@
 // Packages
-import { Box, Button, Grid, TextField, Typography } from "@material-ui/core";
+import { Box, Button, TextField, Typography } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import * as Yup from "yup";
+import { useMeQuery } from "../generated/graphql";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -40,12 +41,19 @@ interface Values {
 
 // ProfileGeneral
 const ProfileGeneral: React.FC = () => {
+    const { data } = useMeQuery();
     const classes = useStyles();
     const [disable, setDisable] = useState(true);
-    const { fullname, username, email } = {
-        fullname: "Hatako Kushikawa",
-        username: "Hatako",
-        email: "Hatako@protonmail.com",
+    
+    let { fullname, username, email } = {
+        fullname: "",
+        username: "",
+        email: ""
+    };
+    if (data?.me) {
+        fullname = data.me.name;
+        username = data.me.username;
+        email = data.me.email;
     }
     
     return (
@@ -74,8 +82,8 @@ const ProfileGeneral: React.FC = () => {
                 >
                     {formik => (
                         <form onSubmit={formik.handleSubmit}>
-                            {formik.values.fullname !== fullname 
-                                ? setDisable(false) 
+                            {formik.values.fullname !== fullname
+                                ? setDisable(false)
                                 : setDisable(true)}
                             <TextField
                                 label="Fullname"
@@ -115,17 +123,16 @@ const ProfileGeneral: React.FC = () => {
                                 disabled
                             />
                             <Box py={2} />
-                            
-                                    <Button
-                                        className={classes.success}
-                                        variant="contained"
-                                        type="submit"
-                                        disabled={disable}
-                                        disableElevation
-                                    >
-                                        Update
-                                </Button>
-                                
+                            <Button
+                                className={classes.success}
+                                variant="contained"
+                                type="submit"
+                                disabled={disable}
+                                disableElevation
+                            >
+                                Update
+                            </Button>
+
                         </form>
                     )}
                 </Formik>

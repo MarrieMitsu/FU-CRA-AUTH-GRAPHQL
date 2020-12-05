@@ -2,7 +2,7 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import React, { useState } from "react";
-import { ZoomTransition } from "../utils/customTransition";
+import { ZoomTransition } from "./customTransition";
 import { Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 

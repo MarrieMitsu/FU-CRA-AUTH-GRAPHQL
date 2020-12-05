@@ -3,9 +3,11 @@ import { Box, Button, Container, Grid, Hidden, Link, Paper, TextField, Typograph
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Formik, FormikHelpers } from "formik";
 import React from "react";
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, RouteComponentProps } from "react-router-dom";
 import * as Yup from "yup";
 import Navbar from "../components/Navbar";
+import { useRegisterMutation } from "../generated/graphql";
+import { mapFieldError } from "../utils/mapFieldError";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -38,8 +40,9 @@ interface Values {
 }
 
 // Register
-const Register: React.FC = () => {
+const Register: React.FC<RouteComponentProps> = ({ history }) => {
     const classes = useStyles();
+    const [registerMutation] = useRegisterMutation();
 
     return (
         <>
@@ -73,11 +76,23 @@ const Register: React.FC = () => {
                                         return this.parent.password === val;
                                     }).required("requried"),
                                 })}
-                                onSubmit={(
-                                    val: Values,
-                                    { setSubmitting }: FormikHelpers<Values>
-                                ) => {
-                                    console.log("Submit data: ", val);
+                                onSubmit={ async (val: Values, { setErrors }: FormikHelpers<Values>) => {
+                                    const response = await registerMutation({
+                                        variables: {
+                                            input: {
+                                                name: val.fullname,
+                                                username: val.username,
+                                                email: val.email,
+                                                password: val.password,
+                                            }
+                                        },
+                                    });
+                                    
+                                    if (response.data?.register.errors) {
+                                        setErrors(mapFieldError(response.data.register.errors));
+                                    } else {
+                                        history.push('/dashboard');
+                                    }
                                 }}
                             >
                                 {formik => (
@@ -158,6 +173,7 @@ const Register: React.FC = () => {
                                             color="secondary"
                                             variant="contained"
                                             type="submit"
+                                            disabled={formik.isSubmitting}
                                             disableElevation
                                             fullWidth
                                         >
