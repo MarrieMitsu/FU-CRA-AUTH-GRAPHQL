@@ -3,7 +3,7 @@ import React from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useMeQuery } from "./generated/graphql";
-import ChangePassword from "./pages/ChangePassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
@@ -56,8 +56,8 @@ const Router: React.FC = () => {
                     needAuth={false}
                     isAuthenticated={Boolean(data?.me)}
                     exact
-                    path="/change-password/:token"
-                    component={ChangePassword}
+                    path="/reset-password/:token"
+                    component={ResetPassword}
                 />
             </Switch>
         </BrowserRouter>

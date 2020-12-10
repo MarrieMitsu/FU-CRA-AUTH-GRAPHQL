@@ -33,8 +33,8 @@ interface Values {
     confirmNewPassword: string;
 }
 
-// ChangePassword
-const ChangePassword: React.FC = () => {
+// ResetPassword
+const ResetPassword: React.FC = () => {
     const classes = useStyles();
 
     return (
@@ -103,7 +103,7 @@ const ChangePassword: React.FC = () => {
                                             disableElevation
                                             fullWidth
                                         >
-                                            Change password
+                                            Reset password
                                         </Button>
                                     </form>
                                 )}
@@ -118,7 +118,7 @@ const ChangePassword: React.FC = () => {
                                     variant="h2"
                                     color="primary"
                                 >
-                                    Change password
+                                    Reset password
                                 </Typography>
                             </Box>
                         </Grid>
@@ -130,4 +130,4 @@ const ChangePassword: React.FC = () => {
 }
 
 // Exports
-export default ChangePassword;
+export default ResetPassword;

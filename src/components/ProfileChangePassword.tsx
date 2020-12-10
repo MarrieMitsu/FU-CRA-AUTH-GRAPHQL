@@ -1,9 +1,13 @@
 // Packages
-import { Box, Button, TextField, Typography } from "@material-ui/core";
+import { Box, Button, IconButton, TextField, Typography } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import React, { useState } from "react";
+import { Close as CloseIcon } from "@material-ui/icons";
 import { Formik, FormikHelpers } from "formik";
+import { useSnackbar } from "notistack";
+import React, { useState } from "react";
 import * as Yup from "yup";
+import { useChangeUserPasswordMutation } from "../generated/graphql";
+import { mapFieldError } from "../utils/mapFieldError";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -33,8 +37,10 @@ interface Values {
 
 // ProfileChangePassword
 const ProfileChangePassword: React.FC = () => {
+    const [changeUserPasswordMutation] = useChangeUserPasswordMutation();
     const classes = useStyles();
     const [disable, setDisable] = useState(true);
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { oldPassword, newPassword, confirmNewPassword } = {
         oldPassword: "",
         newPassword: "",
@@ -60,11 +66,39 @@ const ProfileChangePassword: React.FC = () => {
                             return this.parent.newPassword === val;
                         }),
                     })}
-                    onSubmit={(
-                        val: Values,
-                        { setSubmitting }: FormikHelpers<Values>
-                    ) => {
-                        console.log("Submit data: ", val);
+                    onSubmit={async ( val: Values, { setErrors, resetForm }: FormikHelpers<Values>) => {
+                        const response = await changeUserPasswordMutation({
+                            variables: {
+                                input: {
+                                    oldPassword: val.oldPassword,
+                                    newPassword: val.newPassword
+                                }
+                            }
+                        });
+
+                        if (response.data?.changeUserPassword?.errors) {
+                            setErrors(mapFieldError(response.data.changeUserPassword.errors));
+                        } else {
+                            resetForm({values: {
+                                oldPassword: "",
+                                newPassword: "",
+                                confirmNewPassword: "",
+                            }});
+                            enqueueSnackbar("Success change password", {
+                                variant: "success",
+                                action: key => (
+                                    <>
+                                        <IconButton
+                                            onClick={() => {
+                                                closeSnackbar(key);
+                                            }}
+                                        >
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </>
+                                )
+                            });
+                        }
                     }}
                 >
                     {formik => (

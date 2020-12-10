@@ -1,10 +1,13 @@
 // Packages
-import { Box, Button, TextField, Typography } from "@material-ui/core";
+import { Box, Button, IconButton, TextField, Typography } from "@material-ui/core";
+import { Close as CloseIcon } from "@material-ui/icons";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import * as Yup from "yup";
 import { MeDocument, MeQuery, useMeQuery, useUpdateUserMutation } from "../generated/graphql";
+import { mapFieldError } from "../utils/mapFieldError";
+import { useSnackbar } from "notistack";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -45,6 +48,7 @@ const ProfileGeneral: React.FC = () => {
     const { data } = useMeQuery();
     const classes = useStyles();
     const [disable, setDisable] = useState(true);
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     
     let { fullname, username, email } = {
         fullname: "",
@@ -86,16 +90,29 @@ const ProfileGeneral: React.FC = () => {
                                 cache.writeQuery<MeQuery>({
                                     query: MeDocument,
                                     data: {
-                                        me: data.updateUser
+                                        me: data.updateUser?.user,
                                     }
                                 });
                             }
                         });
 
-                        if (response.data?.updateUser) {
-                            console.log("Update success");
+                        if (response.data?.updateUser?.errors) {
+                            setErrors(mapFieldError(response.data.updateUser.errors));
                         } else {
-                            console.log("Update error");
+                            enqueueSnackbar("Update success", {
+                                variant: "success",
+                                action: key => (
+                                    <>
+                                        <IconButton
+                                            onClick={() => {
+                                                closeSnackbar(key);
+                                            }}
+                                        >
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </>
+                                )
+                            });
                         }
                     }}
                 >

@@ -6,7 +6,7 @@ import React from "react";
 import { Link as LinkRouter, RouteComponentProps } from "react-router-dom";
 import * as Yup from "yup";
 import Navbar from "../components/Navbar";
-import { useRegisterMutation } from "../generated/graphql";
+import { MeDocument, MeQuery, useRegisterMutation } from "../generated/graphql";
 import { mapFieldError } from "../utils/mapFieldError";
 
 // useStyles
@@ -86,6 +86,17 @@ const Register: React.FC<RouteComponentProps> = ({ history }) => {
                                                 password: val.password,
                                             }
                                         },
+                                        update: (cache, { data }) => {
+                                            if (!data) {
+                                                return null;
+                                            }
+                                            cache.writeQuery<MeQuery>({
+                                                query: MeDocument,
+                                                data: {
+                                                    me: data?.register.user
+                                                }
+                                            });
+                                        }
                                     });
                                     
                                     if (response.data?.register.errors) {

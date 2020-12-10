@@ -1,5 +1,11 @@
 mutation UpdateUser ($name: String!) {
     updateUser(name: $name) {
-        ...UserData
+        errors {
+            ...AuthErrorResponse
+        }
+        user {
+            ...UserData
+        }
+        update
     }
 }

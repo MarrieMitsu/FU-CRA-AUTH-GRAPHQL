@@ -1,5 +1,6 @@
 // Packages
-import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import { Backdrop, CircularProgress, CssBaseline, ThemeProvider } from "@material-ui/core";
+import { SnackbarProvider } from "notistack";
 import React, { useEffect, useState } from "react";
 import Router from "./routes";
 import { accessToken } from "./utils/accessToken";
@@ -16,21 +17,27 @@ const App: React.FC = () => {
 			});
 			const { accessToken: token } = await response.json();
 			accessToken.setAccessToken(token);
-			setLoading(false);
+			setTimeout(() => {
+				setLoading(false);
+			}, 500);
 		}
 		refreshToken();
 	}, []);
 
-	if (loading) {
-		return(
-			<div>Loading...</div>
-		);
-	}
-
 	return (
 		<ThemeProvider theme={customTheme}>
-			<CssBaseline />
-			<Router/>
+			{loading ? (
+				<Backdrop open={loading}>
+					<CircularProgress color="inherit" />
+				</Backdrop>
+			) : (
+				<SnackbarProvider
+					maxSnack={3}
+				>
+					<CssBaseline />
+					<Router />
+				</SnackbarProvider>
+			)}
 		</ThemeProvider>
 	);
 }

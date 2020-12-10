@@ -35,9 +35,9 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
-  updateUser?: Maybe<User>;
-  changePassword?: Maybe<Scalars['Boolean']>;
-  deleteUser?: Maybe<DeleteUserResponse>;
+  updateUser?: Maybe<UserResponse>;
+  changeUserPassword?: Maybe<UserResponse>;
+  deleteUser?: Maybe<UserResponse>;
 };
 
 
@@ -56,9 +56,8 @@ export type MutationUpdateUserArgs = {
 };
 
 
-export type MutationChangePasswordArgs = {
-  password: Scalars['String'];
-  id: Scalars['Int'];
+export type MutationChangeUserPasswordArgs = {
+  input: ChangePasswordInput;
 };
 
 
@@ -69,6 +68,8 @@ export type MutationDeleteUserArgs = {
 export type UserResponse = {
   __typename?: 'UserResponse';
   errors?: Maybe<Array<FieldError>>;
+  delete?: Maybe<Scalars['Boolean']>;
+  update?: Maybe<Scalars['Boolean']>;
   user?: Maybe<User>;
   accessToken?: Maybe<Scalars['String']>;
 };
@@ -91,10 +92,9 @@ export type LoginInput = {
   password: Scalars['String'];
 };
 
-export type DeleteUserResponse = {
-  __typename?: 'DeleteUserResponse';
-  errors?: Maybe<Array<FieldError>>;
-  delete: Scalars['Boolean'];
+export type ChangePasswordInput = {
+  oldPassword: Scalars['String'];
+  newPassword: Scalars['String'];
 };
 
 export type DeleteUserInput = {
@@ -125,6 +125,23 @@ export type UserDataFragment = (
   & Pick<User, 'id' | 'name' | 'username' | 'email' | 'profileImage' | 'createdAt' | 'updatedAt'>
 );
 
+export type ChangeUserPasswordMutationVariables = Exact<{
+  input: ChangePasswordInput;
+}>;
+
+
+export type ChangeUserPasswordMutation = (
+  { __typename?: 'Mutation' }
+  & { changeUserPassword?: Maybe<(
+    { __typename?: 'UserResponse' }
+    & Pick<UserResponse, 'update'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & AuthErrorResponseFragment
+    )>> }
+  )> }
+);
+
 export type DeleteUserMutationVariables = Exact<{
   input: DeleteUserInput;
 }>;
@@ -133,8 +150,8 @@ export type DeleteUserMutationVariables = Exact<{
 export type DeleteUserMutation = (
   { __typename?: 'Mutation' }
   & { deleteUser?: Maybe<(
-    { __typename?: 'DeleteUserResponse' }
-    & Pick<DeleteUserResponse, 'delete'>
+    { __typename?: 'UserResponse' }
+    & Pick<UserResponse, 'delete'>
     & { errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & AuthErrorResponseFragment
@@ -184,8 +201,15 @@ export type UpdateUserMutationVariables = Exact<{
 export type UpdateUserMutation = (
   { __typename?: 'Mutation' }
   & { updateUser?: Maybe<(
-    { __typename?: 'User' }
-    & UserDataFragment
+    { __typename?: 'UserResponse' }
+    & Pick<UserResponse, 'update'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & AuthErrorResponseFragment
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & UserDataFragment
+    )> }
   )> }
 );
 
@@ -229,6 +253,41 @@ export const AuthResponseFragmentDoc = gql`
 }
     ${AuthErrorResponseFragmentDoc}
 ${UserDataFragmentDoc}`;
+export const ChangeUserPasswordDocument = gql`
+    mutation ChangeUserPassword($input: ChangePasswordInput!) {
+  changeUserPassword(input: $input) {
+    errors {
+      ...AuthErrorResponse
+    }
+    update
+  }
+}
+    ${AuthErrorResponseFragmentDoc}`;
+export type ChangeUserPasswordMutationFn = Apollo.MutationFunction<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>;
+
+/**
+ * __useChangeUserPasswordMutation__
+ *
+ * To run a mutation, you first call `useChangeUserPasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeUserPasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeUserPasswordMutation, { data, loading, error }] = useChangeUserPasswordMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useChangeUserPasswordMutation(baseOptions?: Apollo.MutationHookOptions<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>) {
+        return Apollo.useMutation<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>(ChangeUserPasswordDocument, baseOptions);
+      }
+export type ChangeUserPasswordMutationHookResult = ReturnType<typeof useChangeUserPasswordMutation>;
+export type ChangeUserPasswordMutationResult = Apollo.MutationResult<ChangeUserPasswordMutation>;
+export type ChangeUserPasswordMutationOptions = Apollo.BaseMutationOptions<ChangeUserPasswordMutation, ChangeUserPasswordMutationVariables>;
 export const DeleteUserDocument = gql`
     mutation DeleteUser($input: DeleteUserInput!) {
   deleteUser(input: $input) {
@@ -360,10 +419,17 @@ export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutatio
 export const UpdateUserDocument = gql`
     mutation UpdateUser($name: String!) {
   updateUser(name: $name) {
-    ...UserData
+    errors {
+      ...AuthErrorResponse
+    }
+    user {
+      ...UserData
+    }
+    update
   }
 }
-    ${UserDataFragmentDoc}`;
+    ${AuthErrorResponseFragmentDoc}
+${UserDataFragmentDoc}`;
 export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
 
 /**

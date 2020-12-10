@@ -1,5 +1,6 @@
 // Packages
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from "@material-ui/core";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, TextField, Typography } from "@material-ui/core";
+import { Close as CloseIcon } from "@material-ui/icons";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
@@ -7,6 +8,7 @@ import * as Yup from "yup";
 import { useDeleteUserMutation, useMeQuery } from "../generated/graphql";
 import { mapFieldError } from "../utils/mapFieldError";
 import { ZoomTransition } from "./customTransition";
+import { useSnackbar } from "notistack";
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -42,6 +44,7 @@ const ProfileDangerZone: React.FC = () => {
     const classes = useStyles();
     const [delAccDialog, setDelAccDialog] = useState<boolean>(false);
     const [disable, setDisable] = useState(true);
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { usernameOrEmail, verify, confirmPassword } = {
         usernameOrEmail: "",
         verify: "",
@@ -92,7 +95,6 @@ const ProfileDangerZone: React.FC = () => {
                             confirmPassword: Yup.string().required("required"),
                         })}
                         onSubmit={async (val: Values, { setErrors }: FormikHelpers<Values>) => {
-                            console.log("Submit data: ", val);
                             const response = await deleteUserMutation({
                                 variables: {
                                     input: {
@@ -109,7 +111,20 @@ const ProfileDangerZone: React.FC = () => {
                             if (response.data?.deleteUser?.errors) {
                                 setErrors(mapFieldError(response.data.deleteUser.errors));
                             } else {
-                                console.log(response.data?.deleteUser);
+                                enqueueSnackbar("Account deleted!", {
+                                    variant: "info",
+                                    action: key => (
+                                        <>
+                                            <IconButton
+                                                onClick={() => {
+                                                    closeSnackbar(key);
+                                                }}
+                                            >
+                                                <CloseIcon />
+                                            </IconButton>
+                                        </>
+                                    )
+                                });
                             }
                         }}
                     >
