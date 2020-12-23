@@ -1,11 +1,11 @@
-interface accessTokenProps {
+interface AccessTokenProps {
     value: string | null | undefined;
     setAccessToken(val: string | null | undefined): void;
 }
 
-export const accessToken: accessTokenProps = {
+export const AccessToken: AccessTokenProps = {
     value: "",
     setAccessToken: function (val) {
-        accessToken.value = val;
+        AccessToken.value = val;
     },
 }

@@ -3,7 +3,7 @@ import { Backdrop, CircularProgress, CssBaseline, ThemeProvider } from "@materia
 import { SnackbarProvider } from "notistack";
 import React, { useEffect, useState } from "react";
 import Router from "./routes";
-import { accessToken } from "./utils/accessToken";
+import { AccessToken } from "./utils/accessToken";
 import customTheme from "./utils/customTheme";
 
 // App
@@ -15,8 +15,8 @@ const App: React.FC = () => {
 				method: "GET",
 				credentials: "include",
 			});
-			const { accessToken: token } = await response.json();
-			accessToken.setAccessToken(token);
+			const { accessToken } = await response.json();
+			AccessToken.setAccessToken(accessToken);
 			setTimeout(() => {
 				setLoading(false);
 			}, 500);

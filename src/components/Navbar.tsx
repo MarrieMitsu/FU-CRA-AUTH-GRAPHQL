@@ -5,7 +5,7 @@ import { AccountCircle as AccountCircleIcon, Close as CloseIcon, Link as LinkIco
 import React, { useState } from "react";
 import { Link as LinkRouter } from "react-router-dom";
 import { useLogoutMutation } from "../generated/graphql";
-import { accessToken } from "../utils/accessToken";
+import { AccessToken } from "../utils/accessToken";
 import { SlideTransition } from "./customTransition";
 
 // useStyles
@@ -76,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({login}) => {
                                 <MenuItem 
                                     onClick={async () => {
                                         await logoutMutation();
-                                        accessToken.setAccessToken("");
+                                        AccessToken.setAccessToken("");
                                         await client.resetStore();
 
                                     }}

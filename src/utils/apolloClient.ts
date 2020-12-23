@@ -1,8 +1,30 @@
 // Packages
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/client';
-import { TokenRefreshLink } from 'apollo-link-token-refresh';
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, Observable } from '@apollo/client';
+import { onError } from "@apollo/client/link/error";
 import jwtDecode from 'jwt-decode';
-import { accessToken } from './accessToken';
+import { AccessToken } from './accessToken';
+
+// Types
+type RefreshTokenResponseObject = {
+    accessToken?: string;
+    message?: string;
+    status?: boolean;
+}
+
+// isTokenValid
+const isTokenValid = (token: string | null | undefined): boolean => {
+    if (token) {
+        const { exp }:any = jwtDecode(token);
+        if (Date.now() >= exp * 1000) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+
+}
 
 // Http link
 const httpLink = new HttpLink({
@@ -10,18 +32,65 @@ const httpLink = new HttpLink({
     credentials: "include"
 });
 
-// Token refresh link
+// Refresh link
+const refreshLink = new ApolloLink((operation, forward) => {
+    return new Observable(observer => {
+        if (!isTokenValid(AccessToken.value)) {
+            fetch("http://localhost:4000/api/auth/refresh_token", {
+                method: "GET",
+                credentials: "include",
+            }).then(async res => {
+                const { accessToken }: RefreshTokenResponseObject = await res.json();
+                AccessToken.setAccessToken(accessToken);
+
+                operation.setContext(({ headers }: any) => ({
+                    headers: {
+                        ...headers,
+                        authorization: `Bearer ${accessToken}`,
+                    }
+                }));
+
+                return forward(operation).subscribe({
+                    next: observer.next.bind(observer),
+                    error: observer.error.bind(observer),
+                    complete: observer.complete.bind(observer)
+                });
+            });
+        } else {
+            return forward(operation).subscribe({
+                next: observer.next.bind(observer),
+                error: observer.error.bind(observer),
+                complete: observer.complete.bind(observer)
+            });
+        }
+    });
+});
 
 // Auth link
 const authLink = new ApolloLink((operation, forward) => {
     operation.setContext(({ headers }: any) => ({
         headers: {
             ...headers,
-            authorization: accessToken.value ? `Bearer ${accessToken.value}` : "",
+            authorization: AccessToken.value ? `Bearer ${AccessToken.value}` : "",
         }
     }));
 
     return forward(operation);
+});
+
+// Error link
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+
+    if (graphQLErrors) {
+        for (let err of graphQLErrors) {
+            console.log("[GraphQL error]: ", err);
+        }
+    }
+
+    if (networkError) {
+        console.log("[GraphQL error]: ", networkError);
+    }
+
 });
 
 // Apollo client
@@ -29,38 +98,8 @@ const client = new ApolloClient({
     connectToDevTools: true,
     cache: new InMemoryCache(),
     link: ApolloLink.from([
-        new TokenRefreshLink({
-            accessTokenField: 'newToken',
-            isTokenValidOrUndefined: () => {
-                const token = accessToken.value
-                if (!token) {
-                    return true;
-                }
-
-                try {
-                    const { exp }: any = jwtDecode(token);
-                    if (Date.now() >= exp * 1000) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                } catch {
-                    return false;
-                }
-            },
-            fetchAccessToken: () => {
-                return fetch("http://localhost:4000/api/auth/refresh_token", {
-                    method: "GET",
-                    credentials: "include",
-                });
-            },
-            handleFetch: (newToken: string) => {
-                accessToken.setAccessToken(newToken.accessToken);
-            },
-            handleError: (err: any) => {
-                console.log(err);
-            }
-        }),
+        errorLink,
+        refreshLink,
         authLink, 
         httpLink
     ]),
