@@ -1,5 +1,6 @@
 // Packages
-import { Box, Button, Container, Grid, Link, Hidden, Paper, TextField, Typography } from "@material-ui/core";
+import { Box, IconButton, Button, Container, Grid, Link, Hidden, Paper, TextField, Typography } from "@material-ui/core";
+import { Close as CloseIcon } from "@material-ui/icons";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { Formik, FormikHelpers } from "formik";
 import React, { useState, useEffect } from "react";
@@ -9,6 +10,8 @@ import { Redirect, Route, RouteComponentProps } from "react-router-dom";
 import * as Yup from "yup";
 import Navbar from "../components/Navbar";
 import { isTokenValid } from "../utils/isTokenValid";
+import { useSnackbar } from "notistack";
+
 
 // useStyles
 const useStyles = makeStyles((theme: Theme) =>
@@ -39,11 +42,12 @@ interface Values {
 
 // ResetPassword
 const ResetPassword: React.FC<RouteComponentProps> = ({ location, history }) => {
+    const [resetPasswordMutation, { client }] = useResetPasswordMutation();
     const classes = useStyles();
     const searchParams = new URLSearchParams(location.search);
     const signature = searchParams.get("signature");
     const [isValid, setIsValid] = useState<boolean>(false);
-    const [resetPasswordMutation, { client }] = useResetPasswordMutation();
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     useEffect(() => {
         const checkSignature = () => {
@@ -95,11 +99,24 @@ const ResetPassword: React.FC<RouteComponentProps> = ({ location, history }) => 
                                     console.log(response);
                                     if (response.data?.resetPassword.update) {
                                         client.resetStore();
+                                        enqueueSnackbar("Reset Success", {
+                                            variant: "success",
+                                            action: key => {
+                                                <>
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            closeSnackbar(key);
+                                                        }}
+                                                    >
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </>
+                                            }
+                                        });
                                         history.push('/login');
                                     } else {
                                         setIsValid(false);
                                     }
-                                    console.log("Submit data: ", val);
                                 }}
                             >
                                 {formik => (
