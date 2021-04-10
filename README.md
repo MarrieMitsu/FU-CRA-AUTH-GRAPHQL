@@ -22,15 +22,15 @@ Server <https://github.com/MarrieMitsu/su-auth-graphql>
 
 ```bash
 # Install dependencies
-yarn
+pnpm
 
 # Setup .env
 
 # Development
-yarn start
+pnpm start
 
 # Production
-yarn build
+pnpm build
 
 ```
 
