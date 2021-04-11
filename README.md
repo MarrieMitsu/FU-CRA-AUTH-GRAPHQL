@@ -39,4 +39,4 @@ pnpm build
 MarrieMitsu | Isnainromadhoni
 
 ## Project status
-#### On progress
+#### Active | On progress
